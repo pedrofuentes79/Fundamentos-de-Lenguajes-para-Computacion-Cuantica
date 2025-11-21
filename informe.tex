@@ -12,12 +12,48 @@
 % Package for ket notation
 \usepackage{braket}
 
+% Package for proof trees
+\usepackage{proof}
+
 % Title and author
 \title{Fundamentos de Lenguajes para Computación Cuántica}
 \author{Pedro Fuentes Urfeig, Matías Mesch}
 
 
 \begin{document}
+
+\section{Ejercicio I.15}
+Definir las compuertas $\textbf{And}$ y $\textbf{Or}$.
+
+And := $\lambda x. \lambda y. match(x, w.match(y, a.inl(*), b.inr(*)), z.inr(*))$
+
+Or := $\lambda x. \lambda y. match(x, a.inr(*), b.match(y, c.inl(*), d.inr(*)))$
+
+\section{Ejercicio I.16}
+Dar el tipo de $\textbf{And}$ y $\textbf{Or}$.
+
+\subsection{Tipo de And}
+
+El tipo de $\textbf{And}$ es: $\text{Bool} \to \text{Bool} \to \text{Bool}$, donde $\text{Bool} = \text{Unit} + \text{Unit}$.
+
+\begin{center}
+\infer[\text{$\to$-intro}]{And := $\lambda x. \lambda y. match(x, w.match(y, a.inl(*), b.inr(*)), z.inr(*)) : \text{Bool} \to \text{Bool} \to \text{Bool}$}{}
+\end{center}
+
+\subsection{Tipo de Or}
+
+El tipo de $\textbf{Or}$ es: $\text{Bool} \to \text{Bool} \to \text{Bool}$.
+
+\begin{center}
+\infer[\text{$\to$-intro}]{Or : \text{Bool} \to \text{Bool} \to \text{Bool}}{
+  \infer[\text{$\to$-intro}]{\lambda y.\ldots : \text{Bool} \to \text{Bool}}{
+    \infer[\text{match-elim}]{match(x, a.inr(*), b.\ldots) : \text{Bool}}{
+      x : \text{Bool}
+    }
+  }
+}
+\end{center}
+
 
 
 \section{Ejercicio II.5}
