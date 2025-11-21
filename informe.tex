@@ -1,0 +1,55 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages for mathematical typesetting
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+% Packages for quantum circuits
+\usepackage{xypic}
+\usepackage{qcircuit}
+
+% Package for ket notation
+\usepackage{braket}
+
+% Title and author
+\title{Fundamentos de Lenguajes para Computación Cuántica}
+\author{Pedro Fuentes Urfeig, Matías Mesch}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Ejercicio III.15}
+
+Dar un circuito que genere el estado $\frac{1}{\sqrt{2}} (\ket{000} + \ket{111})$ a partir de la entrada $\ket{000}$.
+
+Un circuito que cumple es el siguiente:
+\[
+\Qcircuit @C=1em @R=.7em {
+  & \lstick{|0\rangle} & \gate{H} & \ctrl{1} & \qw      & \qw \\
+  & \lstick{|0\rangle} & \qw      & \targ    & \ctrl{1} & \qw \\
+  & \lstick{|0\rangle} & \qw      & \qw      & \targ    & \qw \\
+}
+\]
+
+Veamos que esto es correcto. 
+Comenzamos con el estado $\ket{\psi_0} = \ket{000}$, que es lo mismo que $\ket{0} \otimes \ket{0} \otimes \ket{0}$.
+Vemos que al aplicar Hadamard al primer qubit obtenemos lo siguiente:
+$$\ket{\psi_1} = \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) \otimes \ket{0} \otimes \ket{0}$$
+
+Luego, al aplicar el CNOT con el control en el primer qubit y el target en el segundo, tenemos lo siguiente:
+$$\ket{\psi_2} = \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) \otimes \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) \otimes \ket{0}$$
+
+Esto es porque el control es el primer qubit. Entonces, si el primer qubit es 0, no hace nada (entonces queda en 0 el segundo). Pero si el primero es 1, se cambia el segundo qubit a 1.
+
+Luego, al aplicar el CNOT con el control en el segundo qubit y el target en el tercero, sucede lo mismo pero en el tercer qubit.
+
+$$\ket{\psi_3} = \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) \otimes \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) \otimes \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) $$
+
+Que es lo mismo que $\frac{1}{\sqrt{2}} (\ket{000} + \ket{111})$.
+
+
+
+\end{document}
