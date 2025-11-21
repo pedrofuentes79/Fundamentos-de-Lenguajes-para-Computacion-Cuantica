@@ -19,7 +19,51 @@
 
 \begin{document}
 
-\maketitle
+
+\section{Ejercicio II.5}
+
+Demostrar el teorema 4.12. En \textbf{Set}, los epimorfismos son las funciones sobreyectivas.
+Osea, toda flecha $f: A \to B$ cumple que $\forall b \in B, \exists a \in A$ tal que $f(a) = b$.
+
+Ida: f es un epimorfismo $\implies$ f es sobreyectiva. 
+Vamos a demostrarlo por el contrarrecíproco. Es decir f no es sobreyectiva $\implies$ f no es un epimorfismo.
+Entonces, quiero buscar $g: B \to C, h: B \to C$ con $g \neq h$ pero $g \circ f = h \circ f$.
+
+La idea es que $g(b_0) \neq h(b_0)$ para algún $b_0 \in B$, pero que tengan el mismo comportamiento sobre la imagen de $f$.
+
+Por simpleza tomemos $g(b) = 0$ y $h(b) = \begin{cases} 0 & \text{si } b \neq b_0 \\ 1 & \text{si } b = b_0 \end{cases}$
+
+De este modo, $g(b_0) \neq h(b_0)$, por ende $g \neq h$.
+
+Veamos ahora $g \circ f = h \circ f \iff (g \circ f)(a) = (h \circ f)(a) \forall a \in A$.
+Vemos que $f(a) \neq b_0 \forall a \in A$. Luego,
+\begin{itemize}
+    \item $(g \circ f)(a) = g(f(a)) = 0$, pues $g$ es constante y $f(a) \in Dom(g)$
+    \item $(h \circ f)(a) = h(f(a)) = 0$, pues $f(a) \neq b_0$ por hipótesis.
+\end{itemize}
+
+Luego, vemos que $g \circ f = h \circ f$ para todo $a \in A$, pero no vale que $g = h$, por ende $f$ no es un epimorfismo.
+
+
+Vuelta: f es sobreyectiva $\implies$ f es un epimorfismo.
+Quiero ver que $g \circ f = h \circ f \implies g = h$, para $g: B \to C, h: B \to C$.
+Como asumo que $f$ es sobreyectiva, sé que toda su imagen $B$ está alcanzada por un $f(a)$, con $a \in A$.
+
+Vamos a demostrarlo por absurdo.
+Asumamos que $g(b_1) \neq h(b_1)$ para algún $b_1 \in B$.
+Luego, como $b_1 \in B$, sabemos que existe un $a_1 \in A$ tal que $f(a_1) = b_1$.
+
+Entonces, como sabemos que $g \circ f = h \circ f$, tenemos que:
+
+$$(g \circ f)(a_1) = (h \circ f)(a_1)$$
+$$g(f(a_1)) = h(f(a_1))$$
+$$g(b_1) = h(b_1)$$
+
+Absurdo! Pues habíamos asumido que $g(b_1) \neq h(b_1)$.
+Luego, $g = h$.
+Entonces, $f$ es un epimorfismo.
+
+\qed
 
 \section{Ejercicio III.15}
 
