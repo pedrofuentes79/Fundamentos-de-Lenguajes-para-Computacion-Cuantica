@@ -13,7 +13,8 @@
 \usepackage{braket}
 
 % Package for proof trees
-\usepackage{proof}
+\usepackage{bussproofs}
+\usepackage{lscape}
 
 % Title and author
 \title{Fundamentos de Lenguajes para Computación Cuántica}
@@ -32,27 +33,112 @@ Or := $\lambda x. \lambda y. match(x, a.inr(*), b.match(y, c.inl(*), d.inr(*)))$
 \section{Ejercicio I.16}
 Dar el tipo de $\textbf{And}$ y $\textbf{Or}$.
 
+\begin{landscape}
 \subsection{Tipo de And}
 
-El tipo de $\textbf{And}$ es: $\text{Bool} \to \text{Bool} \to \text{Bool}$, donde $\text{Bool} = \text{Unit} + \text{Unit}$.
+El tipo de $\textbf{And}$ es: $\text{Bool} \to \text{Bool} \to \text{Bool}$, donde $\text{Bool} = \top \lor \top$.
+Tomé $\Gamma = x : \text{Bool}, y : \text{Bool}$.
 
-\begin{center}
-\infer[\text{$\to$-intro}]{And := $\lambda x. \lambda y. match(x, w.match(y, a.inl(*), b.inr(*)), z.inr(*)) : \text{Bool} \to \text{Bool} \to \text{Bool}$}{}
-\end{center}
-
-\subsection{Tipo de Or}
-
-El tipo de $\textbf{Or}$ es: $\text{Bool} \to \text{Bool} \to \text{Bool}$.
-
-\begin{center}
-\infer[\text{$\to$-intro}]{Or : \text{Bool} \to \text{Bool} \to \text{Bool}}{
-  \infer[\text{$\to$-intro}]{\lambda y.\ldots : \text{Bool} \to \text{Bool}}{
-    \infer[\text{match-elim}]{match(x, a.inr(*), b.\ldots) : \text{Bool}}{
-      x : \text{Bool}
-    }
-  }
-}
-\end{center}
+\begin{prooftree}
+  % Primera premisa del match externo: axioma para x
+  \AxiomC{}
+  \RightLabel{$ax$}
+  \UnaryInfC{$\Gamma \vdash x : \top \lor \top$}
+  
+  % Segunda premisa del match externo: match interno (y)
+  % Sub-árbol para el match de y
+      \AxiomC{}
+      \RightLabel{$ax$}
+      \UnaryInfC{$\Gamma \vdash y : \top \lor \top$}
+      
+      \AxiomC{}
+      \RightLabel{$\top_i$}
+      \UnaryInfC{$\Gamma, a : \top \vdash * : \top$}
+      \RightLabel{$\lor_{i_1}$}
+      \UnaryInfC{$\Gamma, a : \top \vdash inl(*) : \top \lor \top$}
+      
+      \AxiomC{}
+      \RightLabel{$\top_i$}
+      \UnaryInfC{$\Gamma, b : \top \vdash * : \top$}
+      \RightLabel{$\lor_{i_2}$}
+      \UnaryInfC{$\Gamma, b : \top \vdash inr(*) : \top \lor \top$}
+      
+      \RightLabel{$\lor_e$}
+      \TrinaryInfC{$\Gamma \vdash match(y, a.inl(*), b.inr(*)) : \text{Bool}$}
+  
+  % Tercera premisa del match externo: rama derecha
+  \AxiomC{}
+  \RightLabel{$\top_i$}
+  \UnaryInfC{$\Gamma, z : \top \vdash * : \top$}
+  \RightLabel{$\lor_{i_2}$} 
+  \UnaryInfC{$\Gamma, z : \top \vdash inr(*) : \text{Bool}$}
+  
+  % Match externo (x) - combina las 3 premisas
+  \RightLabel{$\lor_e$}
+  \TrinaryInfC{$\Gamma \vdash match(x, w.match(y, a.inl(*), b.inr(*)), z.inr(*)) : \text{Bool}$}
+  
+  % Abstracciones lambda
+  \RightLabel{$\to_i$}
+  \UnaryInfC{$x : \text{Bool} \vdash \lambda y. match(x, w.match(y, a.inl(*), b.inr(*)), z.inr(*)) : \text{Bool} \to \text{Bool}$}
+  
+  \RightLabel{$\to_i$}
+  \UnaryInfC{$\vdash \lambda x. \lambda y. match(x, w.match(y, a.inl(*), b.inr(*)), z.inr(*)) : \text{Bool} \to \text{Bool} \to \text{Bool}$}
+\end{prooftree}
+\end{landscape}
+\begin{landscape}
+  \subsection{Tipo de Or}
+  El tipo de $\textbf{Or}$ es: $\text{Bool} \to \text{Bool} \to \text{Bool}$, donde $\text{Bool} = \top \lor \top$.
+  Tomé $\Gamma = x : \text{Bool}, y : \text{Bool}$ y $\Gamma_1 = \Gamma, b : \top$
+  
+  \begin{prooftree}
+    % Primera premisa del match externo: axioma para x
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\Gamma \vdash x : \top \lor \top$}
+    
+    % Segunda premisa del match externo: rama izquierda - inr(*)
+    \AxiomC{}
+    \RightLabel{$\top_i$}
+    \UnaryInfC{$\Gamma, a : \top \vdash * : \top$}
+    \RightLabel{$\lor_{i_2}$}
+    \UnaryInfC{$\Gamma, a : \top \vdash inr(*) : \top \lor \top$}
+    
+    % Tercera premisa del match externo: match interno de y
+      \AxiomC{}
+      \RightLabel{$ax$}
+      \UnaryInfC{$\Gamma_1 \vdash y : \top \lor \top$}
+      
+      \AxiomC{}
+      \RightLabel{$\top_i$}
+      \UnaryInfC{$\Gamma_1, c : \top \vdash * : \top$}
+      \RightLabel{$\lor_{i_1}$}
+      \UnaryInfC{$\Gamma_1, c : \top \vdash inl(*) : \top \lor \top$}
+      
+      \AxiomC{}
+      \RightLabel{$\top_i$}
+      \UnaryInfC{$\Gamma_1, d : \top \vdash * : \top$}
+      \RightLabel{$\lor_{i_2}$}
+      \UnaryInfC{$\Gamma_1, d : \top \vdash inr(*) : \top \lor \top$}
+      
+      \RightLabel{$\lor_e$}
+      \TrinaryInfC{$\Gamma_1 \vdash match(y, c.inl(*), d.inr(*)) : \text{Bool}$}
+    
+    % Match externo (x) - combina las 3 premisas
+    \RightLabel{$\lor_e$}
+    \TrinaryInfC{$\Gamma \vdash match(x, a.inr(*), b.match(y, c.inl(*), d.inr(*))) : \text{Bool}$}
+    
+    % Abstracciones lambda
+    \RightLabel{$\to_i$}
+    \UnaryInfC{$x : \text{Bool}, y : \text{Bool} \vdash match(x, a.inr(*), b.match(y, c.inl(*), d.inr(*))) : \text{Bool}$}
+    
+    \RightLabel{$\to_i$}
+    \UnaryInfC{$x : \text{Bool} \vdash \lambda y. match(x, a.inr(*), b.match(y, c.inl(*), d.inr(*))) : \text{Bool} \to \text{Bool}$}
+    
+    \RightLabel{$\to_i$}
+    \UnaryInfC{$\vdash \lambda x. \lambda y. match(x, a.inr(*), b.match(y, c.inl(*), d.inr(*))) : \text{Bool} \to \text{Bool} \to \text{Bool}$}
+\end{prooftree}
+  
+\end{landscape}
 
 
 
