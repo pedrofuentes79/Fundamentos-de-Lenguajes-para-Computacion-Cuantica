@@ -216,6 +216,38 @@ $$\ket{\psi_3} = \frac{1}{\sqrt{2}} (\ket{0} + \ket{1}) \otimes \frac{1}{\sqrt{2
 
 Que es lo mismo que $\frac{1}{\sqrt{2}} (\ket{000} + \ket{111})$.
 
+\section{Ejercicio III.24}
+En el protocolo BB84, Alice y Bob descartan todos los bits en los que eligieron bases distintas, y se quedan con una clave candidata. Luego eligen al azar algunos bits de esa clave, los comparan públicamente y los descartan, para detectar la posible presencia de un espía (Eve). ¿Cuántos bits necesitan comparar Alice y Bob para tener al menos un 90\% de probabilidad de detectar la presencia de Eve, suponiendo que Eve mide siempre en una base al azar?
 
+
+En la comunicación, si Eve está espiando el canal y mide en una base al azar, va a afectar a lo que reciba Bob (va a medirlo y luego enviarle su medición a Bob). Ya que mide en una base al azar, va a medir correctamente o incorrectamente con la misma probabilidad ($\frac{1}{2}$ para cada caso). Luego, cuando Bob reciba esa medición, va a elegir una base al azar para medirlo. Entonces, a pesar de que no coincidan las bases de Bob y Eve, Bob tiene una probabilidad de $\frac{1}{2}$ de medir lo mismo que había enviado Alice. Esto es porque si difieren las bases, los valores de $0$ y $1$ (en cada base) estarían entrelazados, y Bob al elegir una base al azar, va a medir correctamente con probabilidad $\frac{1}{2}$.
+
+
+Para detectar un error, Alice y Bob comparan algunos bits de su clave candidata (es decir, los bits en los que eligieron la misma base). Si hay alguna diferencia, significa que hay alguien espiando la comunicación, ya que si Alice envió un valor en una base, y Bob lo midió en esa base, deberían ser el mismo; la única opción para que no coincidan es que hay alguien alterando la comunicación. De todos modos, puede suceder que a pesar de que Eve haya medido en una base distinta a la de Alice, Bob obtenga el mismo valor que Alice envió.
+Asumimos que Bob y Alice miden en la misma base, ya que estamos hablando de \textbf{bits de la clave candidata}, que son los que Bob y Alice coinciden en la base.
+
+Veamos la probabilidad de que se detecte un error en 1 bit. Sea A el evento en el que: "Eve mide en una base distinta a la de Alice" y B el evento en el que: "Bob no mide lo mismo que Alice envió".
+
+$$P(\text{detectar error en 1 bit}) = P(A) \cdot P(B) = \frac{1}{2} \cdot \frac{1}{2}  = \frac{1}{4}$$
+
+Luego, la probabilidad de que no se detecte un error en 1 bit es $1 - \frac{1}{4} = \frac{3}{4}$.
+
+Veamos que sucedería en $n$ bits. Para que no se detecte un error en $n$ bits, Eve tendría que pasar desapercibida en todos los bits. Luego, la probabilidad de que no se detecte un error en $n$ bits es $(\frac{3}{4})^n$.
+
+Lo que queremos es ver qué $n$ necesitamos para que la probabilidad de \textbf{detectar un error} sea al menos $0.9$
+
+$$P(\text{detectar un error en $n$ bits}) = 1 - P(\text{no detectar un error en n bits}) = 1 - \left(\frac{3}{4}\right)^n$$
+
+Queremos que esta probabilidad sea al menos $0.9$.
+
+$$1 - \left(\frac{3}{4}\right)^n \geq 0.9$$
+
+$$0.1 \geq \left(\frac{3}{4}\right)^n$$
+
+$$ln(0.1) \geq n \cdot ln\left(\frac{3}{4}\right)$$
+
+$$\frac{ln(0.1)}{ln\left(\frac{3}{4}\right)} \leq n$$
+
+Dado que $\frac{ln(0.1)}{ln\left(\frac{3}{4}\right)} \approx 8.003$, con tomar $n = 9$ nos alcanza.
 
 \end{document}
