@@ -1,9 +1,12 @@
 \documentclass[12pt,a4paper]{article}
+\usepackage{graphicx}
+\usepackage{float}
 
 % Packages for mathematical typesetting
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsthm}
+
 
 % Packages for quantum circuits
 \usepackage{xypic}
@@ -249,5 +252,310 @@ $$ln(0.1) \geq n \cdot ln\left(\frac{3}{4}\right)$$
 $$\frac{ln(0.1)}{ln\left(\frac{3}{4}\right)} \leq n$$
 
 Dado que $\frac{ln(0.1)}{ln\left(\frac{3}{4}\right)} \approx 8.003$, con tomar $n = 9$ nos alcanza.
+
+\section{Algoritmo de codificación superdensa}
+
+\subsection{Traza del algoritmo para los distintos inputs}
+% TODO: escribir esto mejor
+El algoritmo de codificación superdensa tiene como objetivo transmitir 2 bits clásicos enviando 1 qubit entre un emisor llamado Alice y un receptor llamado Bob.
+\\ Se parte de un estado inicial de bell $\beta_{00} = \frac{1}{\sqrt{2}} (\ket{00}+ \ket{11})$
+\\ Alice hace: $(Z^{b1}X^{b2} \otimes I) \beta_{00}$
+\\ Bob aplica la siguiente transformación al resultado de lo obtenido por Alice: $(H \otimes I) CNOT$ y realiza una medición.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{algoritmo_codificacion.png}
+    \label{fig:algoritmo_codificacion}
+\end{figure}
+
+\subsubsection{Traza del algoritmo para bit 00}
+Parte Alice:
+$\\ (Z^{0}X^{0} \otimes I) \beta_{00} = (I \otimes I) \beta_{00}
+\\ = (I \otimes I) \beta_{00} = \beta_{00}
+\\ \frac{1}{\sqrt{2}} (\ket{00}+ \ket{11})
+$
+\\
+Parte Bob:
+$
+\\ (H\otimes I) CNOT  \frac{1}{\sqrt{2}} (\ket{00}+ \ket{11})
+\\ = (H\otimes I)  \frac{1}{\sqrt{2}} (CNOT \ket{00} + CNOT \ket{11})
+\\ = (H\otimes I)  \frac{1}{\sqrt{2}} (\ket{00} + \ket{10})
+\\ = \frac{1}{\sqrt{2}} ((H\otimes I)\ket{00} + (H\otimes I) \ket{10})
+\\ = \frac{1}{\sqrt{2}} ((\frac{1}{\sqrt{2}}(\ket{0} + \ket{1}) \otimes \ket{0}) 
++ (\frac{1}{\sqrt{2}} (\ket{0}) - \ket{1} ) \otimes \ket{0})
+\\ = \frac{1}{\sqrt{2}} ( \frac{1}{\sqrt{2}} (\ket{00} + \ket{10}) + \frac{1}{\sqrt{2}} (\ket{00} - \ket{10}) )
+\\ = \frac{1}{2} (\ket{00} + \ket{10} + \ket{00} - \ket{10})
+\\ = \frac{1}{2} (2 \ket{00}) = \ket{00}
+$
+\subsection{Traza del algoritmo para bit 01}
+Parte Alice:
+$\\ (Z^{0}X^{1} \otimes I) \beta_{00} = (X \otimes I) \beta_{00}
+\\ = (X \otimes I) \frac{1}{\sqrt{2}} (\ket{00}+ \ket{11}
+\\ = \frac{1}{\sqrt{2}} ((X \otimes I) \ket{00}+ (X \otimes I) \ket{11})
+\\ = \frac{1}{\sqrt{2}} ( (X \ket{0})\otimes (I\ket{0}) + (X \ket{1}) \otimes(I \ket{1}))
+\\ = \frac{1}{\sqrt{2}} ( \ket{1} \otimes \ket{0} + \ket{0} \otimes \ket{1})
+\\ = \frac{1}{\sqrt{2}} ( \ket{10} + \ket{01} ) = \beta_{01}
+$
+\\
+Parte Bob:
+$
+\\ (H\otimes I) CNOT\beta_{01}
+\\ = (H\otimes I) (CNOT \frac{1}{\sqrt{2}} ( \ket{10} + \ket{01} )))
+\\ = (H\otimes I) (\frac{1}{\sqrt{2}} ( CNOT \ket{10} + CNOT \ket{01} ))
+\\ = (H\otimes I) (\frac{1}{\sqrt{2}} ( \ket{11} + \ket{01} ))
+\\ = \frac{1}{\sqrt{2}} (  (H\otimes I) \ket{11} +  (H\otimes I)\ket{01} )
+\\ = \frac{1}{\sqrt{2}} (  H\ket{1} \otimes I\ket{1} +  H\ket{0} \otimes I\ket{1} )
+\\ = \frac{1}{\sqrt{2}} (  ((\frac{1}{\sqrt{2}} (\ket{0} - \ket{1})) \otimes \ket{1}) + (\frac{1}{\sqrt{2}} (\ket{0} + \ket{1})) \otimes \ket{1} )
+\\ =\frac{1}{\sqrt{2}} (  ((\frac{1}{\sqrt{2}} (\ket{01} - \ket{11}))) +  (\frac{1}{\sqrt{2}} (\ket{01} + \ket{11})))
+\\ = \frac{1}{\sqrt{2}} (\frac{1}{\sqrt{2}} (\ket{01} - \ket{11} + \ket{01} + \ket{11}))
+\\ = \frac{1}{2} (2\ket{01})
+\\ = \ket{01}
+$ 
+\subsection{Traza del algoritmo para bit 10}
+Parte Alice:
+\\$(Z^{1}X^{0} \otimes I) \beta_{00} = (Z \otimes I) \beta_{00}  
+\\ = (Z \otimes I) \frac{1}{\sqrt{2}} (\ket{00}+ \ket{11}
+\\ = \frac{1}{\sqrt{2}} ( (Z \otimes I)\ket{00} + (Z \otimes I)\ket{11} )
+\\ = \frac{1}{\sqrt{2}} ( \ket{00} - \ket{11} ) = \beta_{10}
+$
+\\
+Parte Bob:\\
+$
+(H\otimes I) CNOT\beta_{10}
+\\ = (H\otimes I) (CNOT \frac{1}{\sqrt{2}} ( \ket{00} - \ket{11} ) ))
+\\ = (H\otimes I) (\frac{1}{\sqrt{2}} ( CNOT \ket{00} - CNOT\ket{11} ))
+\\ = (H\otimes I) (\frac{1}{\sqrt{2}} ( \ket{00} - \ket{10} ))
+\\ = \frac{1}{\sqrt{2}} (  (H\otimes I) \ket{00} -  (H\otimes I)\ket{10} )
+\\ = \frac{1}{\sqrt{2}} (  H\ket{0} \otimes I\ket{0} -  H\ket{1} \otimes I\ket{0} )
+\\ = \frac{1}{\sqrt{2}} (  ((\frac{1}{\sqrt{2}} (\ket{0} + \ket{1})) \otimes \ket{0}) -  (\frac{1}{\sqrt{2}} (\ket{0} - \ket{1})) \otimes \ket{0} )
+\\ =\frac{1}{\sqrt{2}} (  ((\frac{1}{\sqrt{2}} (\ket{00} + \ket{10}))) -  (\frac{1}{\sqrt{2}} (\ket{00} - \ket{10})))
+\\ = \frac{1}{\sqrt{2}} (\frac{1}{\sqrt{2}} (\ket{00} + \ket{10} - \ket{00} + \ket{10}))
+\\ = \frac{1}{2} (2\ket{10})
+\\ = \ket{10}
+$ 
+
+\subsection{Traza del algoritmo para bit 11}
+Parte Alice:
+\\$(Z^{1}X^{1} \otimes I) \beta_{00} = (ZX \otimes I) \beta_{00}  
+\\ = (ZX \otimes II) \beta_{00}
+\\ = (Z \otimes I) ((X \otimes I) \beta_{00})
+\\ = (Z \otimes I) ((X \otimes I) \frac{1}{\sqrt{2}} (\ket{00}+ \ket{11})
+\\ = (Z \otimes I) (\frac{1}{\sqrt{2}} ((X \otimes I) \ket{00}+ (X \otimes I) \ket{11}))
+\\ = (Z \otimes I) (\frac{1}{\sqrt{2}} ( (X \ket{0})\otimes (I\ket{0}) + (X \ket{1}) \otimes(I \ket{1})))
+\\ = (Z \otimes I) (\frac{1}{\sqrt{2}} ( \ket{1} \otimes \ket{0} + \ket{0} \otimes \ket{1}))
+\\ = (Z \otimes I) (\frac{1}{\sqrt{2}} ( \ket{10} + \ket{01} ))
+\\ = \frac{1}{\sqrt{2}} ( (Z \otimes I)\ket{10} + (Z \otimes I)\ket{01} )
+\\ = \frac{1}{\sqrt{2}} ( -\ket{10} + \ket{01} ) = \beta_{11}
+$
+\\
+Parte Bob:\\
+$
+(H\otimes I) CNOT\beta_{11}
+\\ = (H\otimes I) (CNOT \frac{1}{\sqrt{2}} ( \ket{01} - \ket{10} ))
+\\ = (H\otimes I) (\frac{1}{\sqrt{2}} ( CNOT \ket{01} - CNOT\ket{10} ))
+\\ = (H\otimes I) (\frac{1}{\sqrt{2}} ( \ket{01} - \ket{11} ))
+\\ = \frac{1}{\sqrt{2}} (  (H\otimes I) \ket{01} -  (H\otimes I)\ket{11} )
+\\ = \frac{1}{\sqrt{2}} (  H\ket{0} \otimes I\ket{1} -  H\ket{1} \otimes I\ket{1} )
+\\ = \frac{1}{\sqrt{2}} (  ((\frac{1}{\sqrt{2}} (\ket{0} + \ket{1})) \otimes \ket{1}) -  (\frac{1}{\sqrt{2}} (\ket{0} - \ket{1})) \otimes \ket{1} )
+\\ =\frac{1}{\sqrt{2}} (  ((\frac{1}{\sqrt{2}} (\ket{01} + \ket{11}))) -  (\frac{1}{\sqrt{2}} (\ket{01} - \ket{11})))
+\\ = \frac{1}{\sqrt{2}} (\frac{1}{\sqrt{2}} (\ket{01} + \ket{11} - \ket{01} + \ket{11}))
+\\ = \frac{1}{2} (2\ket{11})
+\\ = \ket{11}
+\\ \bra{11} \ket{11} ^2 = 1 \implies
+$ 
+la probabilidad de caer en el estado $\ket{11}$ es del 100\%
+
+\subsection{Algoritmo de cálculo lambda para computación cuántica con control clásico}
+
+Sean las siguientes definiciones:
+\begin{enumerate}
+    \item \textbf{EPR} : $!(\top \multimap (\text{qbit} \otimes \text{qbit}))$ \\
+    \quad $\text{EPR} = \lambda x. \text{CNOT} \langle H(\text{new } 0), \text{new } 0 \rangle$
+    
+    \item \textbf{U} : $!(\text{qbit} \multimap (\text{bit} \otimes \text{bit} \multimap \text{qbit}))$ \\
+    \quad $U = \lambda q. \lambda \langle x,y \rangle. \text{if } x \text{ then } (\text{if } y \text{ then } U_{11} q \text{ else } U_{10} q)$ \\
+    \quad $\quad \text{else } (\text{if } y \text{ then } U_{01} q \text{ else } U_{00} q)$
+\end{enumerate}
+
+donde:
+$$U_{00} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad U_{01} = \begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix}, \quad U_{10} = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}, \quad U_{11} = \begin{pmatrix} 0 & 1 \\ -1 & 0 \end{pmatrix}.$$
+\vspace{1em}
+\noindent \textbf{Algoritmo:}
+\begin{align*}
+    \textbf{Condensacion} &: ! \text{bit} \multimap ! \text{bit} \multimap !(\text{bit} \otimes \text{bit}) \\
+    \text{Condensacion} &= \lambda b_1 \lambda b_2. \left( \text{let } \langle x,y \rangle = \text{EPR}^* \text{ in } \right. \\
+    &\quad \left. \text{let } a = U x \langle b_1,b_2 \rangle \text{ in } \right. \\ % Salto de línea aquí
+    &\quad \left. \text{let } \langle q_1,q_2 \rangle = \text{CNOT} \langle a,y \rangle \text{ in } \langle \text{meas}((H q_1), \text{meas } q_2) \rangle \right)
+\end{align*}
+
+\section{Tipado de la función de condensación}
+
+\begin{landscape}
+\subsection{Derivación del tipo}
+
+Para el tipado de la función de condensación, asumimos $\Gamma = \{ b_1 : !\text{bit}, b_2 : !\text{bit} \}$.
+El objetivo es derivar:
+\[ \vdash \text{Condensacion} : !\text{bit} \multimap !\text{bit} \multimap !(\text{bit} \otimes \text{bit}) \]
+
+Definimos los siguientes términos para simplificar la notación:
+\begin{itemize}
+    \item $M_1 = \text{EPR} \, *$
+    \item $M_2 = U \, x \, \langle b_1, b_2 \rangle$
+    \item $M_3 = \text{CNOT} \, \langle a, y \rangle$
+    \item $M_4 = \langle \text{meas}(H \, q_1), \text{meas} \, q_2 \rangle$
+\end{itemize}
+
+Estructura general:
+\begin{prooftree}
+    \AxiomC{(1)}
+    \noLine
+    \UnaryInfC{$\vdash M_1 : \text{qbit} \otimes \text{qbit}$}
+    
+    \AxiomC{(2)}
+    \noLine
+    \UnaryInfC{$\Gamma, x:\text{qbit}, y:\text{qbit} \vdash \text{let } a = M_2 \text{ in let } \langle q_1, q_2 \rangle = M_3 \text{ in } M_4 : !(\text{bit} \otimes \text{bit})$}
+    
+    \RightLabel{$\otimes_E$}
+    \BinaryInfC{$\Gamma \vdash \text{let } \langle x, y \rangle = M_1 \text{ in } \dots : !(\text{bit} \otimes \text{bit})$}
+    
+    \RightLabel{$\multimap_I$}
+    \UnaryInfC{$b_1:!\text{bit} \vdash \lambda b_2. \dots : !\text{bit} \multimap !(\text{bit} \otimes \text{bit})$}
+    \RightLabel{$\multimap_I$}
+    \UnaryInfC{$\vdash \lambda b_1 \lambda b_2. \dots : !\text{bit} \multimap !\text{bit} \multimap !(\text{bit} \otimes \text{bit})$}
+\end{prooftree}
+
+\bigskip
+
+\textbf{(1) Derivación de $M_1$:}
+\begin{prooftree}
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash \text{EPR} : !(\top \multimap \text{qbit} \otimes \text{qbit})$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$\vdash \text{EPR} : \top \multimap \text{qbit} \otimes \text{qbit}$}
+    
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash * : \top$}
+    
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$\vdash \text{EPR} \, * : \text{qbit} \otimes \text{qbit}$}
+\end{prooftree}
+
+\bigskip
+
+\textbf{(2) Parte principal:}
+Separamos la derivación del cuerpo. Sea $N = \text{let } \langle q_1, q_2 \rangle = M_3 \text{ in } M_4$.
+Usamos la regla de aplicación para el `let a = ...` (equivalente a $(\lambda a. N) M_2$).
+
+\begin{prooftree}
+    \AxiomC{(2.1)}
+    \noLine
+    \UnaryInfC{$\Gamma, x:\text{qbit} \vdash M_2 : \text{qbit}$}
+    
+    \AxiomC{(2.2)}
+    \noLine
+    \UnaryInfC{$y:\text{qbit}, a:\text{qbit} \vdash N : !(\text{bit} \otimes \text{bit})$}
+    
+    \RightLabel{$let/app$}
+    \BinaryInfC{$\Gamma, x:\text{qbit}, y:\text{qbit} \vdash \text{let } a = M_2 \text{ in } N : !(\text{bit} \otimes \text{bit})$}
+\end{prooftree}
+
+\bigskip
+
+\textbf{(2.1) Derivación de $M_2$:}
+\begin{prooftree}
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash U : !(\text{qbit} \multimap (\text{bit} \otimes \text{bit} \multimap \text{qbit}))$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$\vdash U : \text{qbit} \multimap (\text{bit} \otimes \text{bit} \multimap \text{qbit})$}
+    
+    \AxiomC{}
+    \RightLabel{$var$}
+    \UnaryInfC{$x:\text{qbit} \vdash x : \text{qbit}$}
+    
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$x:\text{qbit} \vdash U \, x : \text{bit} \otimes \text{bit} \multimap \text{qbit}$}
+    
+    \AxiomC{}
+    \RightLabel{$var$}
+    \UnaryInfC{$b_1:!\text{bit} \vdash b_1 : !\text{bit}$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$b_1:!\text{bit} \vdash b_1 : \text{bit}$}
+    
+    \AxiomC{}
+    \RightLabel{$var$}
+    \UnaryInfC{$b_2:!\text{bit} \vdash b_2 : !\text{bit}$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$b_2:!\text{bit} \vdash b_2 : \text{bit}$}
+    
+    \RightLabel{$\otimes_I$}
+    \BinaryInfC{$\Gamma \vdash \langle b_1, b_2 \rangle : \text{bit} \otimes \text{bit}$}
+    
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$\Gamma, x:\text{qbit} \vdash U \, x \, \langle b_1, b_2 \rangle : \text{qbit}$}
+\end{prooftree}
+
+\bigskip
+
+\textbf{(2.2) Derivación de $N$:}
+Recordamos $N = \text{let } \langle q_1, q_2 \rangle = \text{CNOT} \langle a, y \rangle \text{ in } M_4$.
+
+\begin{prooftree}
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash \text{CNOT} : !(\text{qbit}^2 \multimap \text{qbit}^2)$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$\vdash \text{CNOT} : \text{qbit}^2 \multimap \text{qbit}^2$}
+    
+    \AxiomC{$a:\text{qbit}, y:\text{qbit} \vdash \langle a, y \rangle : \text{qbit}^2$}
+    
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$a:\text{qbit}, y:\text{qbit} \vdash \text{CNOT} \langle a, y \rangle : \text{qbit} \otimes \text{qbit}$}
+    
+    \AxiomC{(3)}
+    \noLine
+    \UnaryInfC{$q_1:\text{qbit}, q_2:\text{qbit} \vdash M_4 : !(\text{bit} \otimes \text{bit})$}
+    
+    \RightLabel{$\otimes_E$}
+    \BinaryInfC{$a:\text{qbit}, y:\text{qbit} \vdash \text{let } \langle q_1, q_2 \rangle = \dots \text{ in } M_4 : !(\text{bit} \otimes \text{bit})$}
+\end{prooftree}
+
+\bigskip
+
+\textbf{(3) Derivación de $M_4$:}
+$M_4 = \langle \text{meas}(H \, q_1), \text{meas} \, q_2 \rangle$. Usamos la regla $\otimes_I$ con $n=1$.
+
+\begin{prooftree}
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash \text{meas} : !(\text{qbit} \multimap !\text{bit})$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$\vdash \text{meas} : \text{qbit} \multimap !\text{bit}$}
+    
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash H : !(\text{qbit} \multimap \text{qbit})$}
+    \RightLabel{$sub$}
+    \UnaryInfC{$\vdash H : \text{qbit} \multimap \text{qbit}$}
+    \AxiomC{$q_1:\text{qbit} \vdash q_1:\text{qbit}$}
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$q_1:\text{qbit} \vdash H \, q_1 : \text{qbit}$}
+    
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$q_1:\text{qbit} \vdash \text{meas}(H \, q_1) : !\text{bit}$}
+    
+    \AxiomC{}
+    \RightLabel{$ax$}
+    \UnaryInfC{$\vdash \text{meas} : \text{qbit} \multimap !\text{bit}$}
+    \AxiomC{$q_2:\text{qbit} \vdash q_2:\text{qbit}$}
+    \RightLabel{$\multimap_E$}
+    \BinaryInfC{$q_2:\text{qbit} \vdash \text{meas} \, q_2 : !\text{bit}$}
+    
+    \RightLabel{$\otimes_I (n=1)$}
+    \BinaryInfC{$q_1:\text{qbit}, q_2:\text{qbit} \vdash \langle \text{meas}(H \, q_1), \text{meas} \, q_2 \rangle : !(\text{bit} \otimes \text{bit})$}
+\end{prooftree}
+
+\end{landscape}
 
 \end{document}

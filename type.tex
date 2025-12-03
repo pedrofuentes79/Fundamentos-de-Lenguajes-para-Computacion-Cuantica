@@ -1,0 +1,369 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%                                     %%%%%
+%%%%%         Section  -- Types           %%%%%
+%%%%%                                     %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{The typed quantum lambda-calculus}
+\label{sec-types}
+
+We will now define a type system designed to eliminate all run-time
+errors arising from the reduction system of the previous section. We
+need base types (such as $\bittype$ and $\qbittype$), function types,
+and product types. In addition, we need the type system to capture a
+notion of duplicability, as discussed in
+Section~\ref{subsec-linearity}. We follow the notation of linear logic
+{\cite{girard87}}. By default, a term of type $A$ is assumed to be
+non-duplicable, and duplicable terms are given the type $\bang{A}$
+instead.  Formally, the set of types is defined as follows, where
+$\alpha$ ranges over a set of type constants and $X$ ranges over a
+countable set of type variables:
+\[
+\begin{array}{llcl}
+{\it \qType}\quad & A,B\quad & ::=\quad \alpha 
+\; | \; X 
+\; | \; \bang{A} 
+\; | \; (A \loli B)
+\; | \; \produnittype
+\; | \; (A \otimes B)
+\end{array}
+\]
+Note that, because all terms are assumed to be non-duplicable by
+default, the language has a linear function type $A\loli B$ and a
+linear product type $A\otimes B$. This reflects the fact that there is
+in general no canonical diagonal function $A \rightarrow A\otimes A$.
+Also, $\produnittype$ is the linear unit type. This will be made more
+formal in the typing rules below. We write $\nbang{n}{A}$ for
+${!!!\ldots!!}\!A$, with $n$ repetitions of $!$. We also write $A^n$
+for the $n$-fold tensor product $A\otimes\ldots\otimes A$. 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%                                     %%%%%
+%%%%%      Subsection  -- Subtyping       %%%%%
+%%%%%                                     %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Subtyping}
+
+The typing rules will ensure that any value of type $!A$ is
+duplicable. However, there is no harm in using it only once; thus,
+such a value should also have type $A$. For this reason, we define a
+subtyping relation $\subtype$ as follows:
+\[
+\begin{array}{c}
+\infer[{\it (ax)}\ ]{ \alpha \subtype \alpha}{}
+\quad
+\infer[{\it (var)}\ ]{ X \subtype X }{}
+\quad
+\infer[(\top)]{ \top \subtype \top}{}
+\quad
+\infer[(D)\ ]
+        { \bang{A} \subtype B }
+        {  A \subtype B }
+\quad
+\infer[(!)\ ]
+        { \bang{A} \subtype \bang{B} }
+        { \bang{A} \subtype  B }
+\\\\
+\infer[(\otimes)]{
+  A_1\otimes A_2 \subtype
+  B_1\otimes B_2
+}{
+  A_1 \subtype B_1
+  &
+  A_2 \subtype B_2
+}
+\quad
+\infer[(\loli)\ ]
+        { A' \loli B \subtype A \loli B' }
+        { 
+          A \subtype A'
+        &
+          B \subtype B'
+        }
+\end{array}
+\]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{lemma} \label{lem:subtype:set1set2} %%% 
+  For any types $A$ and $B$, if $A \subtype B$ and $(m=0)\vee(n\geq 1)$,
+  then $\nbang{n}{A} \subtype \nbang{m}{B}$.\qed
+\end{lemma}
+Notice that one can rewrite types using the notation:
+\[
+\begin{array}{llcl}
+{\it \qType}\quad & A,B\quad & ::=\quad \nbang{n}{\alpha}
+\; | \; \nbang{n}{X}
+\; | \; \nbang{n}{(A \loli B)}
+\; | \; \nbang{n}{\produnittype}
+\; | \; \nbang{n}{(A \otimes B)}
+\end{array}
+\]
+with $n\in\mathbb{N}$. Using the overall condition on $n$ and $m$ that
+$(m=0)\vee(n\geq 1)$, the rules can be re-written as:
+\[ 
+\begin{array}{c}
+  \infer[(var_2)]
+        { \nbang{n}{X} \subtype \nbang{m}{X} }
+        { }\quad
+\infer[(\alpha)]
+        { \nbang{n}{\alpha} \subtype \nbang{m}{\alpha} }
+        {}\quad
+\infer[(\top)]{ \nbang{n}{\top} \subtype \nbang{m}{\top}}{}
+\\\\
+\infer[(\otimes)]{
+  \nbang{n}{(A_1\otimes A_2)} \subtype
+  \nbang{m}{(B_1\otimes B_2)}
+}{
+  A_1 \subtype B_1
+  &
+  A_2 \subtype B_2
+}\quad
+\infer[(\loli_2)]
+        { \nbang{n}{(A' \loli B)} \subtype \nbang{m}{(A \loli B')} }
+        { 
+          A \subtype A'
+          &
+          B \subtype B'
+        }
+\end{array}
+\]
+The two sets of rules are equivalent. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{lemma} \label{lem:subtype:reversible} %%% 
+The rules of the second set are reversible.\qed
+\end{lemma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{lemma} \label{lem:qtype:refltrans} %%% 
+  $(\qType, \subtype)$ is reflexive and transitive. If we define an
+  equivalence relation $\doteqdot$ by $A \doteqdot B$ iff $A \subtype
+  B$ and $B \subtype A$, $(\qType/{\doteqdot}, \subtype)$ is a poset.
+  \qed
+\end{lemma}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{lemma} \label{lem:qtype:bang} %%% 
+If $A \subtype \bang{B}$, then there exists $C$ such that $A=\bang{C}$.
+\qed
+\end{lemma}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%                                     %%%%%
+%%%%%    Subsection  -- Typing rules      %%%%%
+%%%%%                                     %%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table*}[t]
+\def\mynl{\\\\[-1ex]}
+\begin{center}
+\begin{tabular}{c}
+\begin{tabular}{c c}
+$$
+\infer[({\it ax}_1)]{\Delta, \typ{x}{A} \entail x:B}{A \subtype B}
+$$ &$$
+\infer[({\it ax}_2)]{\Delta \entail c:B}{A_c \subtype B}
+$$
+\end{tabular}\mynl
+
+$$
+\infer[({\it if})]
+      { \Gamma_1, \Gamma_2, !\Delta \entail \iftermx{P}{M}{N} : A}
+      {
+        \Gamma_1, \bang{\Delta} \entail P : bit
+        &
+        \Gamma_2, \bang{\Delta} \entail M : A
+        &
+        \Gamma_2, \bang{\Delta} \entail N : A
+      }
+$$\mynl
+
+$$
+\infer[({\it app})]
+      {\Gamma_1, \Gamma_2, \bang{\Delta} \entail M N : B}
+      {
+        \Gamma_1, \bang{\Delta} \entail M : A \loli B
+        &
+        \Gamma_2, \bang{\Delta} \entail N : A
+      }
+$$\mynl
+\begin{tabular}{c c}
+$$
+\infer[(\lambda_1)]
+      { \Delta \entail \lambda x.M : A \loli B}
+      { \typ{x}{A}, \Delta \entail M : B}
+$$& $$
+\infer[(\lambda_2)]
+      { \Gamma, \bang{\Delta} \entail \lambda x.M : \nbang{n+1}{(A \loli B)}}
+      { \begin{array}{@{}c@{}}\mbox{If $FV(M)\cap|\Gamma| = \emptyset$:}\\\Gamma, \bang{\Delta}, \typ{x}{A} \entail M : B
+      \end{array}}
+      $$\\
+\end{tabular}\mynl
+
+\begin{tabular}{c c}
+$$
+\infer[(\otimes.I)]{
+  \bang{\Delta},\Gamma_1,\Gamma_2
+  \entail
+  \langle M_1,M_2\rangle : \nbang{n}{({A_1}\otimes{A_2})}
+}{
+  \bang{\Delta},\Gamma_1 \entail M_1 : \nbang{n}{A_1}
+  &
+  \bang{\Delta},\Gamma_2 \entail M_2 : \nbang{n}{A_2}
+}
+$$
+&
+$$
+\infer[(\produnittype)]{
+  \Delta \entail \produnitterm : \nbang{n}{\produnittype}
+}{}
+$$
+\end{tabular}
+\mynl
+$$
+\infer[(\otimes.E)]{
+  \bang{\Delta}, \Gamma_1, \Gamma_2 
+  \entail
+  \textrm{let }\langle x_1,x_2\rangle=M\textrm{ in }N :A
+}{
+  \bang{\Delta}, \Gamma_1\entail M:\nbang{n}{(A_1\otimes A_2)}
+  &
+  \bang{\Delta},
+  \Gamma_2,~x_1{:}\nbang{n}{A_1},~x_2{:}\nbang{n}{A_2}\entail N:A
+}
+$$\\
+\end{tabular}
+\end{center}
+\caption{Typing rules}
+\label{type:typrules}
+%\hfill\rule{4in}{0.1mm}\hfill{}
+\vspace{-5ex}
+\end{table*}
+
+\subsection{Typing rules}
+
+We need to define what it means for a quantum state $[Q,L,M]$ to be
+well-typed. It turns out that the typing does not depend on $Q$ and
+$L$, but only on $M$. We introduce typing judgments of the form
+$\Delta\entail M:B$. Here $M$ is a term, $B$ is a $\qType$, and
+$\Delta$ is a typing context, i.e., a function from a set of variables
+to $\qType$. As usual, we write $\abs{\Delta}$ for the domain of
+$\Delta$, and we denote typing contexts as
+$\typ{x_1}{A_1},\ldots,\typ{x_n}{A_n}$. As usual, we write
+$\Delta,\typ{x}{A}$ for $\Delta\cup\s{\typ{x}{A}}$ if
+$x\not\in\abs{\Delta}$. Also, if
+$\Delta=\typ{x_1}{A_1},\ldots,\typ{x_n}{A_n}$, we write
+$\bang{\Delta}=\typ{x_1}{\bang{A_1}},\ldots,\typ{x_n}{\bang{A_n}}$. A
+typing judgement is called \define{valid} if it can be derived from
+the rules in Table~\ref{type:typrules}.
+
+The typing rule $({\it ax})$ assumes that to every constant $c$ of the
+language, we have associated a fixed type $A_c$. The types $A_c$ are
+defined as follows:
+\[\begin{array}{l@{\hspace{1cm}}l@{\hspace{1cm}}c}
+A_0 = \bang{\bit} &
+A_{\newterm} = \bang{(\bit \loli \qbit)}\\
+A_1 = \bang{\bit} &
+A_{\measureterm} = \bang{(\qbit \loli \bang{\bit}}) &
+A_U = \bang{(\qbit^n\loli\qbit^n)}
+\end{array}\]
+
+Note that we have given the type $\bang{(\bit \loli \qbit)}$ to the
+term $\newterm$. Another possible choice would have been
+$\bang{(\bang{\bit}\loli \qbit)}$, which makes sense because all
+classical bits are duplicable. However, since $\bang{(\bit \loli
+  \qbit)}\subtype \bang{(\bang{\bit}\loli \qbit)}$, the second type is
+less general, and can be inferred by the typing rules.
+
+Note that, if $[Q,L,M]$ is a program state, the term $M$ need not be
+closed; however, all of its free variables must be in the domain of
+$L$, and thus must be of type $\qbit$. We therefore define:
+
+\begin{definition}\rm
+  A program state $[Q,L,M]$ is \define{well-typed of type} $B$ if
+  $\Delta\entail M:B$ is derivable, where
+  $\Delta=\s{\typ{x}{\qbittype}\such x\in\FV(M)}$. In this case, we
+  write $[Q,L,M]:B$. 
+\end{definition}
+
+\subsection{Example: quantum teleportation}
+
+Let us illustrate the quantum lambda calculus and the typing rules
+with an example. The following is an implementation of the well-known
+quantum teleportation protocol (see e.g. {\cite{nielsen02}}).  The
+purpose of the teleportation protocol is to send a qubit from location
+$A$ to location $B$, using only classical communication and a
+pre-existing shared entangled quantum state. In fact, this can be
+achieved by communicating only the content of two classical bits. 
+
+In terms of functional programming, the teleportation procedure can be
+seen as the creation of two non-duplicable functions $f:\qbittype
+\loli \bittype\otimes\bittype$ and $g:\bittype\otimes\bittype \loli
+\qbittype$, such that $f\circ g(x)=x$ for an arbitrary qubit $x$.
+
+We start by defining the following functions ${\bf
+  EPR}:{!(\produnittype\loli(\qbittype\otimes\qbittype))}$, ${\bf
+  BellMeasure}:
+{!(\qbittype\loli(\qbittype\loli\bittype\otimes\bittype))}$, and ${\bf
+  U:{!(\qbittype\loli(\bittype\otimes\bittype\loli \qbittype))}}$:
+\[\begin{array}{lll}
+  {\bf EPR} &=& \lambda x. {\it
+    CNOT}\prodterm{H(\newterm 0), \newterm 0},
+  \\[1ex]
+  {\bf BellMeasure} &=& \lambda q_2.\lambda q_1.
+  ({\it let}\ \prodterm{x,y} = {\it CNOT}\prodterm{q_1, q_2}
+  \ {\it in}\ \prodterm{\measureterm (H x),\measureterm y},
+  \\[1ex]
+  {\bf U} &=& \lambda q.\lambda\prodterm{x,y}.\mbox{{\it if $x$}}
+  \begin{array}[t]{l}
+    \mbox{\it then $(\iftermx{y}{U_{11}q}{U_{10}q})$}
+    \\ \mbox{\it else $(\iftermx{y}{U_{01}q}{U_{00}q})$},
+  \end{array}
+\end{array}
+\]
+where
+\[
+\begin{array}{llll}
+U_{00}=\left(\begin{array}{cc}1&0\\0&1\end{array}\right),&
+U_{01}=\left(\begin{array}{cc}0&1\\1&0\end{array}\right),&
+U_{10}=\left(\begin{array}{cc}1&0\\0&-1\end{array}\right),&
+U_{11}=\left(\begin{array}{cc}0&1\\-1&0\end{array}\right).
+\end{array}
+\]
+The function ${\bf EPR}$ creates an entangled state
+$\frac{1}{\sqrt{2}}(\ket{00}+\ket{11})$.  The function ${\bf
+  BellMeasure}$ performs a so-called Bell measurement, and the
+function ${\bf U}$ performs a unitary correction on the qubit $q$
+depending on the value of two classical bits. We can now construct a
+pair of functions $f:\qbittype \loli \bittype\otimes\bittype$ and
+$g:\bittype\otimes\bittype \loli \qbittype$ with the above property by
+the following code:
+\[
+\begin{array}{l}
+\letprodterm{x,y}{{\bf EPR} \produnitterm\\}{
+  {\it let}\ {f}\ = {\bf BellMeasure}\ x\\\ \quad{\it in}\ {\it let}\
+  {g}\ = {\bf U}\ y.\\\ \quad{\it in}\ \prodterm{f, g}.
+}
+\end{array}
+\]
+The functions $f$ and $g$ thus created do indeed have the desired
+property that $f\circ g(x)=x$, where $x$ is any qubit. Note that,
+since $f$ and $g$ depend on the state of the qubits $x$ and $y$,
+respectively, these functions cannot be duplicated, which is reflected
+in the fact that the types of $f$ and $g$ do not contain a top-level
+``!''.
+
+% LocalWords:  judgments
