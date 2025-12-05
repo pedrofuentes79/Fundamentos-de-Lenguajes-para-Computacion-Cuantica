@@ -23,6 +23,28 @@
 \title{Fundamentos de Lenguajes para Computación Cuántica}
 \author{Pedro Fuentes Urfeig, Matías Mesch}
 
+\newcommand\qbit{\textit{qubit}}
+\newcommand\pqbit{\ensuremath{\mathbf{qubit}}}
+\newcommand{\p}[1]{\mathbf{#1}}
+\newcommand{\pmultimap}{\multimap}
+\newcommand{\pwith}{\&}
+\newcommand{\sdot}{\cdot}
+\newcommand{\Plus}{+}
+\newcommand{\topintro}{\top}
+\newcommand{\elimone}{\delta_1}
+\newcommand{\elimwith}{\delta_{\&}}
+\newcommand{\elimtens}{\delta_{\otimes}}
+\newcommand{\elimzero}{\delta_{0}}
+\newcommand{\elimplus}{\delta_{\oplus}}
+\newcommand{\inl}{\text{inl}}
+\newcommand{\inr}{\text{inr}}
+\newcommand{\abstr}[1]{#1.}
+\newcommand{\one}{1}
+\newcommand{\zero}{0}
+
+\newcommand{\pair}[2]{\langle #1, #2 \rangle}
+\newcommand{\ketbra}[2]{\ket{#1}\bra{#2}}
+\newcommand{\defeq}{\mathrel{\mathop:}=}
 
 \begin{document}
 
@@ -415,33 +437,127 @@ $$U_{00} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}, \quad U_{01} = \begin{p
  \\
  $[\ket{11}, \langle 1, 1 \rangle]$
 
+\section{Algoritmo en cálculo lambda $\mathcal{L}_{\mathcal{B}}$}
 
-\section{Algoritmo en cálculo lambda-S}
+\subsection{Definición del algoritmo}
 
+En este cálculo, definimos el tipo qubit puro como $\pqbit \defeq \one \pwith \one$.
+Los vectores de la base computacional se codifican como:
+\[ \ket{0} \defeq \p{\pair{\ast}{0 \sdot \ast}} \quad \text{y} \quad \ket{1} \defeq \p{\pair{0 \sdot \ast}{\ast}} \]
 
-%Dejo esto acá porque lo leí del paper y puede ser útil para escribir el algoritmo%
-A Hadamard gate can be implemented by
+Las compuertas lógicas cuánticas ($X, Z, H, CNOT$) se definen como términos puros $\p U$ que actúan linealmente sobre los términos. Por ejemplo, $X$ intercambia los componentes del par.
+
+El algoritmo de condensación se construye en el fragmento mixto usando el operador de embebido $\mathcal{B}$.
+Asumimos que tenemos términos puros para las transformaciones:
+\begin{itemize}
+    \item $\p{EPR}$: Término de tipo $\pqbit \otimes \pqbit$ que representa $\beta_{00}$.
+    \item $\p{U}_{b_1 b_2}$: Transformación unitaria local de Alice (dependiente de los bits clásicos).
+    \item $\p{BobOp}$: Composición de $H \otimes I$ y $CNOT$ que aplica Bob.
+\end{itemize}
+
+\subsection{Construcción del término completo}
+
+A continuación, desarrollamos las definiciones explícitas de los componentes.
+
+Definimos los operadores base:
+\begin{align*}
+    \p{X} &\defeq \lambda x. \elimwith^1(x, \_. \ket{1}) \Plus \elimwith^2(x, \_. \ket{0}) \\
+    \p{Z} &\defeq \lambda x. \elimwith^1(x, \_. \ket{0}) \Plus \elimwith^2(x, \_. (-1) \sdot \ket{1}) \\
+    \p{H} &\defeq \frac{1}{\sqrt{2}} \sdot (\p X \Plus \p Z)
+\end{align*}
+
+El operador CNOT se define siguiendo la definición estándar del paper, en el ejemplo 5.7:
+
 \[
-H = \lambda x : \mathbb{B}.\; x \; ?\; \ket{-} \; :\; \ket{+},
+\p{CNOT} \defeq \lambda z. \elimtens\Big(z, x y.
+    \tfrac{1}{2} (x \otimes y) \Plus
+    \tfrac{1}{2} (\p Z x \otimes y) \Plus
+    \tfrac{1}{2} (x \otimes \p X y) \Plus
+    \tfrac{-1}{2} (\p Z x \otimes \p X y)\Big)
 \]
-where
+
+Definimos el operador de Alice generalizado $\p{AliceOp}(b_1, b_2)$ que aplica $Z^{b_1} X^{b_2}$ al par x. Recordamos que $\p{M}^0 = \p I$ y $\p M^1 = \p M$.
+
 \[
-\ket{+} = \frac{1}{\sqrt{2}}\,\ket{0} 
-        + \frac{1}{\sqrt{2}}\,\ket{1},
-\qquad
-\ket{-} = \frac{1}{\sqrt{2}}\,\ket{0}
-        - \frac{1}{\sqrt{2}}\,\ket{1}.
+\p{U}_{b_1 b_2} \defeq \lambda x. Z ^{b_1} X ^{b_2} x
 \]
 
-Therefore \( H : \mathbb{B} \Rightarrow S\mathbb{B} \), and we have
+El operador de Alice sobre el par EPR es:
 \[
-H\,\ket{0} \;\longrightarrow^{*}\; \ket{+},
-\qquad
-H\,\ket{1} \;\longrightarrow^{*}\; \ket{-}.
+\p{AliceOp}(b_1, b_2) \defeq \lambda w. \elimtens(w, x y. (\p{U}_{b_1 b_2} x) \otimes y)
 \]
 
+El operador de Bob ($\p{BobOp} = (\p H \otimes \p{id}) \circ \p{CNOT}$):
+\[
+\p{BobOp} \defeq \lambda w. \elimtens(\p{CNOT} \text{ } w, x y. (\p H x) \otimes y)
+\]
+
+El estado inicial EPR:
+\[
+\p{EPR} \defeq \frac{1}{\sqrt{2}} \sdot (\ket{0} \otimes \ket{0} \Plus \ket{1} \otimes \ket{1})
+\]
+
+Finalmente, definimos el término completo como una función en el fragmento mixto que toma dos bits clásicos (de tipo $\mathbb{B} = \one \oplus \one$) y produce el estado final medido.
+Presentamos la definición usando una notación de casos, que se implementa formalmente mediante eliminadores de suma anidados ($\elimplus$):
+
+\[
+\text{Condensacion} \defeq \lambda b_1 b_2. Term_{b_1 b_2}
+\]
+
+Donde $Term_{b_1 b_2}$ es el término mixto definido anteriormente, instanciado con los operadores puros fijos correspondientes:
+\[
+\text{Term}_{ij} \defeq \text{Meas} \left( \mathcal{B} \left( \p{BobOp} (\p{AliceOp}_{ij} \, \p{EPR}) \right) \right)
+\]
+Con $\p{AliceOp}_{ij} = \lambda w. \elimtens(w, x y. (\p Z^i (\p X^j x)) \otimes y)$.
+
+Donde $\text{Meas}$ es el término que define la medición en la base computacional, construido como la suma de los proyectores $\p P_{ij} = \ketbra{ij}{ij}$ (análogo al Ejemplo 5.7 del paper):
+\[
+\text{Meas} \defeq \mathcal{B}(\p P_{00}) \Plus \mathcal{B}(\p P_{01}) \Plus \mathcal{B}(\p P_{10}) \Plus \mathcal{B}(\p P_{11})
+\]
+Al evaluar $\text{Condensacion} \ \text{True} \ \text{True}$, el término se reduce a $\text{Term}_{11}$, que a su vez reduce a $\mathcal{B}(\ket{11})$.
+
+\subsection{Tipo del término}
+
+El término $\text{Condensacion}$ es una función en el fragmento mixto.
+Si definimos el tipo booleano como $\mathbb{B} \defeq \one \oplus \one$, entonces:
+\[ \vdash \text{Condensacion} : \mathbb{B} \multimap \mathbb{B} \multimap \mathcal{B}(\pqbit \otimes \pqbit) \]
 
 
+\subsection{Traza de ejecución en $\mathcal{L}_{\mathcal{B}}$ (caso $b_1=1, b_2=1$)}
 
+Analizamos la reducción de $\text{Condensacion} \ \text{True} \ \text{True}$.
+1. La aplicación de las lambdas y los ``if'' reduce el término a $\text{Term}_{11}$.
+2. La ejecución continúa dentro del operador $\mathcal{B}$ siguiendo las reglas del fragmento puro hasta la medición final.
+
+\noindent \textbf{1. Estado inicial:}
+\[ \p{EPR} \rightarrow \frac{1}{\sqrt{2}} (\ket{00} + \ket{11}) \]
+
+\noindent \textbf{2. Operación de Alice ($\p U_{11} = \p Z \otimes \p I \circ \p X \otimes \p I$):}
+Alice aplica $X$ y luego $Z$ al primer qubit.
+\begin{align*}
+    (\p X \otimes \p I) \p{EPR} &\rightarrow \frac{1}{\sqrt{2}} (\ket{10} + \ket{01}) \\
+    (\p Z \otimes \p I) (\dots) &\rightarrow \frac{1}{\sqrt{2}} (-\ket{10} + \ket{01}) = \frac{1}{\sqrt{2}} (\ket{01} - \ket{10})
+\end{align*}
+
+\noindent \textbf{3. Operación de Bob - CNOT:}
+Bob aplica CNOT sobre el par recibido. Recordamos que $\text{CNOT} \ket{10} = \ket{11}$ y $\text{CNOT} \ket{01} = \ket{01}$.
+\[
+    \p{CNOT} \left( \frac{1}{\sqrt{2}} (\ket{01} - \ket{10}) \right) \rightarrow \frac{1}{\sqrt{2}} (\ket{01} - \ket{11})
+\]
+Factorizando el segundo qubit ($\ket{1}$), el estado es:
+\[ \frac{1}{\sqrt{2}} (\ket{0} - \ket{1}) \otimes \ket{1} = \ket{-} \otimes \ket{1} \]
+
+\noindent \textbf{4. Operación de Bob - Hadamard:}
+Bob aplica $H$ al primer qubit. Dado que $\p H \ket{-} = \ket{1}$:
+\[
+    (\p H \otimes \p I) (\ket{-} \otimes \ket{1}) \rightarrow \ket{1} \otimes \ket{1} = \ket{11}
+\]
+
+\noindent \textbf{5. Medición final:}
+El término ha reducido a $\mathcal{B}(\ket{11})$. Al aplicar $\text{Meas}$, que es la suma de proyectores $\mathcal{B}(\p P_{ij})$, el único término que no se anula es $\mathcal{B}(\p P_{11})$.
+\[
+    \text{Meas} (\mathcal{B}(\ket{11})) \rightarrow \dots \rightarrow \mathcal{B}(\ket{11})
+\]
+Esto confirma que los bits recuperados son $1$ y $1$.
 
 \end{document}
