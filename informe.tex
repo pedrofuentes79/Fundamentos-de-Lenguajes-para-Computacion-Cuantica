@@ -455,8 +455,6 @@ Asumimos que tenemos términos puros para las transformaciones:
     \item $\p{BobOp}$: Composición de $H \otimes I$ y $CNOT$ que aplica Bob.
 \end{itemize}
 
-\subsection{Construcción del término completo}
-
 A continuación, desarrollamos las definiciones explícitas de los componentes.
 
 Definimos los operadores base:
@@ -482,7 +480,7 @@ Definimos el operador de Alice generalizado $\p{AliceOp}(b_1, b_2)$ que aplica $
 \p{U}_{b_1 b_2} \defeq \lambda x. Z ^{b_1} X ^{b_2} x
 \]
 
-El operador de Alice sobre el par EPR es:
+El operador de Alice sobre w (el par de EPR) es:
 \[
 \p{AliceOp}(b_1, b_2) \defeq \lambda w. \elimtens(w, x y. (\p{U}_{b_1 b_2} x) \otimes y)
 \]
@@ -497,8 +495,7 @@ El estado inicial EPR:
 \p{EPR} \defeq \frac{1}{\sqrt{2}} \sdot (\ket{0} \otimes \ket{0} \Plus \ket{1} \otimes \ket{1})
 \]
 
-Finalmente, definimos el término completo como una función en el fragmento mixto que toma dos bits clásicos (de tipo $\mathbb{B} = \one \oplus \one$) y produce el estado final medido.
-Presentamos la definición usando una notación de casos, que se implementa formalmente mediante eliminadores de suma anidados ($\elimplus$):
+Finalmente, definimos el término completo que toma dos bits clásicos (de tipo $\mathbb{B} = \one \oplus \one$) y produce el estado final medido.
 
 \[
 \text{Condensacion} \defeq \lambda b_1 b_2. Term_{b_1 b_2}
@@ -514,7 +511,6 @@ Donde $\text{Meas}$ es el término que define la medición en la base computacio
 \[
 \text{Meas} \defeq \mathcal{B}(\p P_{00}) \Plus \mathcal{B}(\p P_{01}) \Plus \mathcal{B}(\p P_{10}) \Plus \mathcal{B}(\p P_{11})
 \]
-Al evaluar $\text{Condensacion} \ \text{True} \ \text{True}$, el término se reduce a $\text{Term}_{11}$, que a su vez reduce a $\mathcal{B}(\ket{11})$.
 
 \subsection{Tipo del término}
 
@@ -525,9 +521,7 @@ Si definimos el tipo booleano como $\mathbb{B} \defeq \one \oplus \one$, entonce
 
 \subsection{Traza de ejecución en $\mathcal{L}_{\mathcal{B}}$ (caso $b_1=1, b_2=1$)}
 
-Analizamos la reducción de $\text{Condensacion} \ \text{True} \ \text{True}$.
-1. La aplicación de las lambdas y los ``if'' reduce el término a $\text{Term}_{11}$.
-2. La ejecución continúa dentro del operador $\mathcal{B}$ siguiendo las reglas del fragmento puro hasta la medición final.
+Analizamos la reducción de $\text{Condensacion} \ \one \ \one$. Vamos "desde adentro hacia afuera".
 
 \noindent \textbf{1. Estado inicial:}
 \[ \p{EPR} \rightarrow \frac{1}{\sqrt{2}} (\ket{00} + \ket{11}) \]
