@@ -18,3 +18,8 @@
 # Temporary files
 *.tmp
 *.temp
+temp_informe_snippet.tex
+paper3/00README.json
+paper3/tikzit.sty
+.gitignore
+paper3/arxiv.tex
